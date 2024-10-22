@@ -3,7 +3,6 @@ import PIL.Image
 import mlx.core as mx
 from typing import Optional, Tuple
 from PIL import Image
-
 from .diffusionkit.mlx.tokenizer import Tokenizer, T5Tokenizer
 from .diffusionkit.mlx.t5 import SD3T5Encoder
 from .diffusionkit.mlx import load_t5_encoder, load_t5_tokenizer, load_tokenizer, load_text_encoder
@@ -30,7 +29,7 @@ class MLXDecoder:
         decoded = mx.clip(decoded / 2 + 0.5, 0, 1)
 
         mx.eval(decoded)
- 
+
         # Convert MLX tensor to numpy array
         decoded_np = np.array(decoded.astype(mx.float16))
 
@@ -86,6 +85,8 @@ class MLXSampler:
             denoise=denoise,
         )
 
+        mx.eval(latents)
+
         latents = latents.astype(mlx_model.activation_dtype)
 
         return (latents,)
@@ -116,12 +117,11 @@ class MLXLoadFlux:
         else:
             print("Model folder not found, downloading from HuggingFace... 🤗")
 
-
     def load_flux_model(self, model_version):
 
         self.check_model_folder(model_version)
 
-        model = FluxPipeline(model_version=model_version, low_memory_mode=True, w16=True, a16=True)
+        model = FluxPipeline(model_version=model_version, low_memory_mode=False, w16=True, a16=True)
 
         clip = {
             "model_name": model_version,
@@ -132,6 +132,7 @@ class MLXLoadFlux:
         }
         
         print("Model successfully loaded.")
+        
 
         return (model, model.decoder, clip)
     
@@ -143,7 +144,7 @@ class MLXClipTextEncoder:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {"text": ("STRING", {"multiline": True, "dynamicPrompts": True}), "mlx_conditioning": ("mlx_conditioning", {"forceInput":True})}}
-    
+
 
     RETURN_TYPES = ("mlx_conditioning",)
     FUNCTION = "encode"
@@ -186,7 +187,7 @@ class MLXClipTextEncoder:
         clip_l_tokenizer:Tokenizer = mlx_conditioning["clip_l_tokenizer"]
         t5_encoder:SD3T5Encoder = mlx_conditioning["t5_model"]
         t5_tokenizer:T5Tokenizer = mlx_conditioning["t5_tokenizer"]
-
+        
         # CLIP processing
         clip_tokens = self._tokenize(tokenizer=clip_l_tokenizer, text=text) 
 
@@ -215,6 +216,8 @@ class MLXClipTextEncoder:
             "conditioning": t5_embeddings,
             "pooled_conditioning": clip_pooled_output
         }
+
+
 
         return (output, ) 
 
