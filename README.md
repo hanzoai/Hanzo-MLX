@@ -1,3 +1,5 @@
+<p align="center"><img src=".github/hero.svg" alt="Hanzo-MLX" width="880"></p>
+
 # Hanzo-MLX
 
 **Apple Silicon acceleration for the Hanzo ecosystem**
