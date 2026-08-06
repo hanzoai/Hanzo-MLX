@@ -44,7 +44,6 @@ Part of the curated Hanzo ComfyUI stack. See all nodes at [github.com/hanzoai](h
 
 ## Upstream
 
-Fork of [thoddnn/ComfyUI-MLX](https://github.com/thoddnn/ComfyUI-MLX) - regularly synced with upstream.
 
 **Note**: Currently optimized for Flux models. SD 1.5 support coming soon.
 
