@@ -1,0 +1,27 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # mlx runs on Apple silicon and this pool is linux/amd64, so the node cannot
+  # be imported or exercised here. What is checkable without the accelerator is
+  # that every module still compiles and the package metadata is well formed.
+  check:
+    runs-on: [hanzo-build-linux-amd64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m compileall -q .
+      - run: |
+          pip install --quiet build twine
+          python -m build --sdist --wheel
+          twine check dist/*
